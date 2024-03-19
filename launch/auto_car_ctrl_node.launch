@@ -1,0 +1,25 @@
+<launch>
+  <!-- Arguments -->
+  <arg name="pourcent_range" default="0.1" />
+  <arg name="dist_follow_wall" default="0.15" />
+  <arg name="angle_max_left" default="25" />
+  <arg name="angle_max_right" default="-20" />
+  <arg name="speed_max" default="100.0" />
+  <!-- Parameters -->
+  <param name="pourcent_range" value="$(arg pourcent_range)" />
+  <param name="dist_follow_wall" value="$(arg dist_follow_wall)" />
+  <param name="angle_max_left" value="$(arg angle_max_left)" />
+  <param name="angle_max_right" value="$(arg angle_max_right)" />
+  <param name="speed_max" value="$(arg speed_max)" />
+
+  <!-- Start the nodes -->
+  <node name="crash_node" pkg="auto_car_ctrl" type="crash_test" />
+  <node name="lidar_process_node" pkg="auto_car_ctrl" type="lidar_process" />
+  <node name="cmd_vel_node" pkg="auto_car_ctrl" type="cmd_vel_node" />
+
+  <!-- Launch RVIZ -->
+  <arg name="rviz" default="false" />
+  <group if="$(eval rviz == true)">
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find auto_car_ctrl)/rviz/auto_car_ctrl_rviz.rviz" />
+  </group>
+</launch>
