@@ -50,7 +50,9 @@ int main(int argc, char** argv) {
     // Création des subscribers ----------------------------------------------------------------------------------
     motor_sub = nh.subscribe("/auto_car/arduino/mot", 100, &motorCallBack);
     lidar_sub = nh.subscribe("/scan", 100, &lidarCallback);
+    /*---------------------A vérif par Erwan---------------------*/ 
     goodWay_sub = nh.subscribe("/auto_car/crash/goodway", 100, &goodWayCallBack);
+    /*-----------------------------------------------------------*/
     // Création des publishers -----------------------------------------------------------------------------------
     crash_pub = nh.advertise<auto_car_ctrl::rosBool>("auto_car/crash/iscrashed", 100);
     ROS_INFO("Complete.");

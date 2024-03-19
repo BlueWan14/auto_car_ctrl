@@ -159,7 +159,7 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg) {
             
             if((left_edge_vision > angle) && (angle > right_edge_vision) && (scan_msg->ranges[i] < accept_range) && (scan_msg->ranges[i] > dist_follow_wall)) {
                 space = std::abs(scan_msg->ranges[i] * std::sin(angle - goal.val));
-                if(space < dist_follow_wall) {
+                    if(space < dist_follow_wall) {
                     delAngle.push_back(goal.val);
                     WrongGoal = true;
                     p.x = scan_msg->ranges[i] * std::cos(angle);
