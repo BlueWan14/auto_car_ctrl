@@ -66,10 +66,10 @@ void lidarCallBack(const auto_car_ctrl::rosFloat &angle_msg) {
     // Commande de vitesse du moteur (en %)
     if(cmd.angular.z < angle_max_right) {
         // On ralenti pour tourner plus vite à droite
-        cmd.linear.x = speed_max - ((cmd.angular.z - angle_max_right) * speed_max / (-91.5 - angle_max_right));
+        cmd.linear.x = speed_max - ((cmd.angular.z - angle_max_right) * speed_max / (-102.5 - angle_max_right));
     } else if(cmd.angular.z > angle_max_left) {
         // On ralenti pour tourner plus vite à gauche
-        cmd.linear.x = speed_max - ((cmd.angular.z - angle_max_left) * speed_max / (91.5 - angle_max_left));
+        cmd.linear.x = speed_max - ((cmd.angular.z - angle_max_left) * speed_max / (102.5 - angle_max_left));
     } else {
         cmd.linear.x = way * speed_max;                                         // On met les gaz
     }

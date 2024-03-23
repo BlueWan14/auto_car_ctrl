@@ -2,19 +2,23 @@
   <!-- Arguments -->
   <arg name="pourcent_range" default="0.1" />
   <arg name="dist_follow_wall" default="0.1" />
+  <arg name="rviz" default="true" />
+  <arg name="lidar" default="false" />
   <!-- Parameters -->
   <param name="pourcent_range" value="$(arg pourcent_range)" />
   <param name="dist_follow_wall" value="$(arg dist_follow_wall)" />
+  <param name="rviz" value="$(arg rviz)" />
 
   <!-- Start the nodes -->
   <node name="lidar_process_node" pkg="auto_car_ctrl" type="lidar_process" />
 
   <!-- Launch RVIZ -->
-  <arg name="rviz" default="false" />
-  <group if="$(eval rviz == true)">
+  <group if="$(eval rviz)">
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find auto_car_ctrl)/rviz/auto_car_ctrl_rviz.rviz" />
   </group>
 
-  <!-- Set the crash bool to false -->
-  <node pkg="rostopic" type="rostopic" name="rostopic_pub_node" output="screen" args="pub /auto_car/crash auto_car_ctrl/rosBool 'answer: false'" />
+  <!-- Start the lidar -->
+  <group if="$(eval lidar)">
+    <include file="$(find ydlidar_ros)/launch/X4.launch" />
+  </group>
 </launch>
