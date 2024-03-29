@@ -103,6 +103,14 @@ Visualization Manager:
         {}
       Queue Size: 100
       Value: true
+    - Class: rviz/Marker
+      Enabled: true
+      Marker Topic: /auto_car/markers/wrongGoal
+      Name: Wrong Goal
+      Namespaces:
+        {}
+      Queue Size: 100
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 48; 48; 48
@@ -139,17 +147,17 @@ Visualization Manager:
         Value: false
       Field of View: 0.7853981852531433
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0
+        X: 0.023901574313640594
+        Y: 0.05107257142663002
+        Z: 0.0926576554775238
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.785398006439209
+      Pitch: 0.4003978967666626
       Target Frame: <Fixed Frame>
-      Yaw: 0.785398006439209
+      Yaw: 3.2403979301452637
     Saved: ~
 Window Geometry:
   Displays:
@@ -167,5 +175,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1200
-  X: 56
-  Y: 0
+  X: 54
+  Y: -30

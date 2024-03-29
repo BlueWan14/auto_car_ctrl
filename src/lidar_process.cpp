@@ -8,15 +8,17 @@
 
 // DÉCLARATION DES VARIABLES =====================================================================================
 #define NBELT 100
-#define car_size 0.9
+#define car_size 0.09
 
 bool crash = false,
      rviz = false;
 const float pi = std::acos(-1),                                                 // Calcul de pi
             left_edge_vision = pi / 2,
-            right_edge_vision = - pi / 2;
+            right_edge_vision = - pi / 2,
+            left_crash_vision = pi / 6,
+            right_crash_vision = - pi / 6;
 float dist_follow_wall = 0.15,
-      pourcent_range = 0.05;
+      pourcent_range = 0.1;
 
 // Markers Rviz --------------------------------------------------------------------------------------------------
 visualization_msgs::Marker lidar;
@@ -183,7 +185,7 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg) {
         for(int i = 0; i <= scan_msg->ranges.size(); i++) {
             angle = scan_msg->angle_min + i * scan_msg->angle_increment;
             
-            if((left_edge_vision > angle) && (angle > right_edge_vision) && (0.0 < scan_msg->ranges[i]) && (scan_msg->ranges[i] < accept_range)) {
+            if((left_edge_vision > angle) && (angle > right_edge_vision) && (car_size < scan_msg->ranges[i]) && (scan_msg->ranges[i] < accept_range)) {
                 space = std::abs(scan_msg->ranges[i] * std::sin(angle - goal.val));
                 if(space < dist_follow_wall) {
                     delAngle[size] = goal.val;
@@ -200,8 +202,6 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg) {
                         wrongGoal_marker.points.push_back(p);
                     }
                 }
-            } else {
-                break;
             }
         }
         if(!WrongGoal)
@@ -210,7 +210,7 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg) {
 
     // Protocol en cas de crash ----------------------------------------------------------------------------------
     if(crash) {
-        if((-0.52 > goal.val) && (goal.val > 0.52)) {   // Si le point le plus loin n'est pas dans un angle de 60° devant nous (0.52 = 30°)
+        if((angle < right_crash_vision) || (left_crash_vision < angle)) {   // Si le point le plus loin n'est pas dans un angle de 60° devant nous (0.52 = 30°)
             goal.val = - goal.val;                      // Alors on active le protocole recule
             way.val = -1;
             isGoodWay.answer = false;

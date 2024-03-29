@@ -5,7 +5,6 @@
   <arg name="angle_max_left" default="25" />
   <arg name="angle_max_right" default="-20" />
   <arg name="speed_max" default="100.0" />
-  <arg name="time_between" default="100.0" />
   <arg name="rviz" default="false" />
   <!-- Parameters -->
   <param name="pourcent_range" value="$(arg pourcent_range)" />
@@ -13,7 +12,6 @@
   <param name="angle_max_left" value="$(arg angle_max_left)" />
   <param name="angle_max_right" value="$(arg angle_max_right)" />
   <param name="speed_max" value="$(arg speed_max)" />
-  <param name="time_between" value="$(arg time_between)" />
   <param name="rviz" value="$(arg rviz)" />
 
   <!-- Start the nodes -->
