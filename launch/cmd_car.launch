@@ -24,8 +24,8 @@
   </group>
   
   <!-- Start the arduino communication -->
-  <arg name="arduino_port" default="/dev/ttyACM0" />
-  <node name="arduino_comm" pkg="rosserial_python" type="serial_node.py" args="$(arg arduino_port)" />
+  <arg name="arduino_port" default="ACM0" />
+  <node name="arduino_comm" pkg="rosserial_python" type="serial_node.py" args="/dev/tty$(arg arduino_port)" />
   
   <!-- Start the lidar -->
   <include file="$(find ydlidar_ros)/launch/X4.launch" />

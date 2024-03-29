@@ -28,7 +28,7 @@ ros::Publisher cmd_pub;
 
 // PROTOTYPES ====================================================================================================
 void motorCallBack(const auto_car_ctrl::motors &);
-void goodWayCallBack(const auto_car_ctrl::rosBool &)
+void goodWayCallBack(const auto_car_ctrl::rosBool &);
 void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &);
 
 
