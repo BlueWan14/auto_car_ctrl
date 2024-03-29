@@ -10,7 +10,7 @@
   <param name="rviz" value="$(arg rviz)" />
 
   <!-- Start the nodes -->
-  <node name="lidar_process_node" pkg="auto_car_ctrl" type="lidar_process" />
+  <node name="lidar_process_node" pkg="auto_car_ctrl" type="lidar_process" output="screen" />
 
   <!-- Launch RVIZ -->
   <group if="$(eval rviz)">
