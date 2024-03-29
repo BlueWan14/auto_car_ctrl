@@ -206,6 +206,7 @@ void loop() {
   msg_mot.rearObstacle = pulseIn(Echo, HIGH) * 0.034 / 2; // Calcul de la distance : Durée totale * La vitesse du son (0.034 cm/µs) / 2 (Aller-retour des ultrasons)
 
   // Écriture de la vitesse et la rotation actuelle sur return_vel ---------------------
+  msg_mot.header.stamp = nh.now();
   msg_mot.vel.linear.x = VtP(MotSpeed, ForwardMax, NEUTRAL, BackwardMax);
   msg_mot.vel.angular.z = MotAngle - MIDDLE;
   return_vel.publish(&msg_mot);

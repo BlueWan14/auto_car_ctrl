@@ -15,6 +15,7 @@ float max_range, too_close,
 int angle_max_left = 40,
     angle_max_right = -40;
 bool start;
+double last_cmd, timeBetween = 3.5;
 
 // Other sub and publisher ---------------------------------------------------------------------------------------
 ros::Subscriber processed_sub;
@@ -40,6 +41,7 @@ int main(int argc, char** argv) {
     ros::param::get("/angle_max_left", angle_max_left);
     ros::param::get("/angle_max_right", angle_max_right);
     ros::param::get("/speed_max", speed_max);
+    ros::param::get("/time_between", timeBetween);
 
     // Création des subscribers ----------------------------------------------------------------------------------
     processed_sub = nh.subscribe("/auto_car/cmd/lidar_process", 100, &lidarCallBack);
@@ -51,6 +53,7 @@ int main(int argc, char** argv) {
     ROS_INFO("Complete.");
 
     ROS_INFO("Starting loop.");
+    last_cmd = ros::Time::now().toSec();
     ros::spin();                                                                // Boucle de fonctionnement du package
 }
 
@@ -82,7 +85,8 @@ void lidarCallBack(const auto_car_ctrl::rosFloat &angle_msg) {
         cmd.angular.z = 0;
     }
     
-    cmd_pub.publish(cmd);
+    if((ros::Time::now().toSec() - last_cmd) >= 1)
+        cmd_pub.publish(cmd);
 }
 
 void wayCallBack(const auto_car_ctrl::rosFloat &way_msg) {
