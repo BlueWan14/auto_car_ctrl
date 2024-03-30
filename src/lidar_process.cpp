@@ -210,15 +210,14 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg) {
 
     // Protocol en cas de crash ----------------------------------------------------------------------------------
     if(crash) {
-        if((angle < right_crash_vision) || (left_crash_vision < angle)) {   // Si le point le plus loin n'est pas dans un angle de 60° devant nous (0.52 = 30°)
+        if((left_crash_vision < goal.val) && (goal.val < right_crash_vision)) {   // Si le point le plus loin n'est pas dans un angle de 60° devant nous (0.52 = 30°)
+            isGoodWay.answer = true;
+            way.val = 1;                                    // Et on relance la marche avant
+        } else {
             goal.val = - goal.val;                      // Alors on active le protocole recule
             way.val = -1;
             isGoodWay.answer = false;
-        } else {                                        // Sinon, on désactive le protocole
-            isGoodWay.answer = true;
         }
-    } else {
-        way.val = 1;                                    // Et on relance la marche avant
     }
     
     // Publication des valeurs sur les topics --------------------------------------------------------------------
