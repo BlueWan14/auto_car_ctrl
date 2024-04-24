@@ -8,20 +8,20 @@ This is an academic project for the authors[^1] during their 2<sup>nd</sup> year
 
 # Installation
 ## Hardware
-### You'll need
+### Requierments
 - Raspberry PI 4[^3]
 - Arduino Mega 2560[^3]
 - Lidar X4 from ydlidar
 - TAMAYA car
 
-[^3]: equivalent or better configuration works too.
+[^3]: equivalent or better configuration
 
 ### Connections
 Please look at the [electrical schematic](electrical_schematic.png).
 
 
 ## Sofware
-### You'll need
+### Requierments
 - [ROS noetic](https://wiki.ros.org/ROS)
 - [ydlidar ros driver package](https://www.ydlidar.com/dowfile.html?cid=5&type=2)
 - [serial ros driver package](https://github.com/ros-drivers/rosserial)
@@ -39,8 +39,14 @@ git clone https://github.com/BlueWan14/auto_car_ctrl.git
 cd .. && catkin_make
 ```
 
+Then use this command to compile ROS libraries for Arduino :
+```
+rosrun rosserial_arduino make_libraries.py ~/sketchbook/libraries/
+```
+And upload [car_motors.ino](./car_motors/car_motors.ino) in the Arduino card with the Arduino IDE.
 
-# Using launch files
+
+# Using the package
 ## Full program
 ```
 roslaunch auto_car_ctrl cmd_car.launch
