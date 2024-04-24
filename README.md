@@ -9,13 +9,15 @@ This is an academic project for the authors[^1] during their 2<sup>nd</sup> year
 # Installation
 ## Hardware
 ### You'll need
-- Raspberry PI 4 or above
-- Arduino Mega 2560
+- Raspberry PI 4[^3]
+- Arduino Mega 2560[^3]
 - Lidar X4 from ydlidar
 - TAMAYA car
 
+[^3]: equivalent or better configuration works too.
+
 ### Connections
-Please look at the graphique *(will comme soon)*.
+Please look at the [electrical schematic](electrical_schematic.png).
 
 
 ## Sofware
