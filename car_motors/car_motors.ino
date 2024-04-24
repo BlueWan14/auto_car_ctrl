@@ -2,7 +2,7 @@
 
 #include <Servo.h>
 #include <ros.h>
-#include <geometry_msgs/Twist.h>
+#include <auto_car_ctrl/CmdVel.h>
 #include <auto_car_ctrl/motors.h>
 
 
@@ -38,23 +38,19 @@ int MotSpeed = NEUTRAL,
     MotAngle = MIDDLE,
     Speed_mem = NEUTRAL;
 // Initialisation des variables de télécommande
-int SW = 0;
+int SW;
 
 
 // DÉFINITIONS DE FONCTIONS ============================================================
 /*
 description : Fonction callback appelé à chaque modification du topic auto_car/mot/cmd_vel
-paramètre : (const, geometry_msgs::Twist, pointeur) msg : message reçu.
+paramètre : (const, auto_car_ctrl::CmdVel, pointeur) msg : message reçu.
 */
-void cmdCallback(const geometry_msgs::Twist &msg) {
+void cmdCallback(const auto_car_ctrl::CmdVel &msg) {
   if(SW > auto_limit) {
-    // Lecture des commandes selon le torseur envoyé -------------------------------------
-    float RosSpeedX = msg.linear.x;
-    float RosAngleZ = msg.angular.z;
-    
     // Calcul des commandes réelles ------------------------------------------------------
-    MotSpeed = PtV(RosSpeedX, ForwardMax, NEUTRAL, BackwardMax);
-    MotAngle = RosAngleZ + MIDDLE;
+    MotSpeed = PtV(msg.linear, ForwardMax, NEUTRAL, BackwardMax);
+    MotAngle = msg.angular + MIDDLE;
 
     // Les variables sont contraintes sur leur plage de fonctionnement, elle ne peuvent pas en sortir
     MotAngle = constrain(MotAngle, TurnRightMax, TurnLeftMax);
@@ -120,7 +116,6 @@ void break_sys() {
     MotorLinear.writeMicroseconds(NEUTRAL);     // Remise au point mort
     delay(115);                                 // Tempo minimale pour relancer le moteur
   }
-  return;
 }
 
 
@@ -131,7 +126,7 @@ auto_car_ctrl::motors msg_mot;
 // Initialisation d'export de donnée sur le topic "auto_car/mot/vel"
 ros::Publisher return_vel("auto_car/arduino/mot", &msg_mot);
 // Initialisation de reception de donnée sur le topic "auto_car/cmd_vel"
-ros::Subscriber<geometry_msgs::Twist> cmd_vel("auto_car/arduino/cmd_vel", &cmdCallback);
+ros::Subscriber<auto_car_ctrl::CmdVel> cmd_vel("auto_car/arduino/cmd_vel", &cmdCallback);
 
 // SETUP ===============================================================================
 void setup() {
@@ -157,7 +152,7 @@ void setup() {
   MotorLinear.writeMicroseconds(NEUTRAL);
   MotorAngular.write(MIDDLE);
 
-  while (!nh.connected())
+  while(!nh.connected())
     nh.spinOnce();
   if(nh.getParam("/angle_max_left", &TurnLeftMax))
     TurnLeftMax = TurnLeftMax + MIDDLE;
@@ -186,9 +181,6 @@ void loop() {
   digitalWrite(Trigger, LOW); // On remet la broche TRIG a "0"
   msg_mot.rearObstacle = pulseIn(Echo, HIGH) * 0.034 / 2;
 
-  // Écriture de la vitesse et la rotation actuelle sur return_vel ---------------------
-  msg_mot.vel.linear.x = VtP(MotSpeed, ForwardMax, NEUTRAL, BackwardMax);
-  msg_mot.vel.angular.z = MotAngle - MIDDLE;
   return_vel.publish(&msg_mot);
 
   // Lecture de la communication avec ROS ----------------------------------------------

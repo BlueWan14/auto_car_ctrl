@@ -10,8 +10,6 @@ project(auto_car_ctrl)
 find_package(catkin REQUIRED
     roscpp
     sensor_msgs
-    ydlidar
-    geometry_msgs
     std_msgs
     message_generation
     COMPONENTS roslaunch
@@ -56,6 +54,7 @@ add_message_files(
     motors.msg
     rosBool.msg
     rosFloat.msg
+    CmdVel.msg
 )
 
 # # Generate services in the 'srv' folder
@@ -76,7 +75,6 @@ add_message_files(
 generate_messages(
     DEPENDENCIES
     std_msgs
-    geometry_msgs
     sensor_msgs
 )
 

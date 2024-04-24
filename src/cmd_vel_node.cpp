@@ -1,7 +1,7 @@
 #include <ros/ros.h>
 #include <auto_car_ctrl/rosBool.h>
 #include <auto_car_ctrl/rosFloat.h>
-#include <geometry_msgs/Twist.h>
+#include <auto_car_ctrl/CmdVel.h>
 #include <unistd.h>
 
 
@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
     way_sub = nh.subscribe("/auto_car/cmd/way", 100, &wayCallBack);
 
     // Création des publishers -----------------------------------------------------------------------------------
-    cmd_pub = nh.advertise<geometry_msgs::Twist>("auto_car/arduino/cmd_vel", 100);
+    cmd_pub = nh.advertise<auto_car_ctrl::CmdVel>("auto_car/arduino/cmd_vel", 100);
     ROS_INFO("Complete.");
 
     ROS_INFO("Starting loop.");
@@ -58,20 +58,20 @@ description : Fonction callback appelée à chaque modification du topic /auto_c
 paramètre : (const, auto_car_ctrl::rosFloat::ConstPtr, pointeur) angle_msg : message reçu.
 */
 void lidarCallBack(const auto_car_ctrl::rosFloat &angle_msg) {
-    geometry_msgs::Twist cmd;
+    auto_car_ctrl::CmdVel cmd;
 
     // Commande de rotation des roues (en °)
-    cmd.angular.z = angle_msg.val * 180 / pi;                                   // Suivi de l'objectif
+    cmd.angular = angle_msg.val * 180 / pi;                                   // Suivi de l'objectif
 
     // Commande de vitesse du moteur (en %)
-    if(cmd.angular.z < angle_max_right) {
+    if(cmd.angular < angle_max_right) {
         // On ralenti pour tourner plus vite à droite
-        cmd.linear.x = speed_max - ((cmd.angular.z - angle_max_right) * speed_max / (-102.5 - angle_max_right));
-    } else if(cmd.angular.z > angle_max_left) {
+        cmd.linear = speed_max - ((cmd.angular - angle_max_right) * speed_max / (-102.5 - angle_max_right));
+    } else if(cmd.angular > angle_max_left) {
         // On ralenti pour tourner plus vite à gauche
-        cmd.linear.x = speed_max - ((cmd.angular.z - angle_max_left) * speed_max / (102.5 - angle_max_left));
+        cmd.linear = speed_max - ((cmd.angular - angle_max_left) * speed_max / (102.5 - angle_max_left));
     } else {
-        cmd.linear.x = way * speed_max;                                         // On met les gaz
+        cmd.linear = way * speed_max;                                         // On met les gaz
     }
     
     cmd_pub.publish(cmd);
