@@ -154,10 +154,6 @@ void setup() {
 
   while(!nh.connected())
     nh.spinOnce();
-  if(nh.getParam("/angle_max_left", &TurnLeftMax))
-    TurnLeftMax = TurnLeftMax + MIDDLE;
-  if(nh.getParam("/angle_max_right", &TurnRightMax))
-    TurnRightMax = TurnRightMax + MIDDLE;
 }
 
 // MAIN ================================================================================

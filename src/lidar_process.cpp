@@ -48,7 +48,6 @@ int main(int argc, char** argv) {
     ROS_INFO("Init ROS...");
     ros::init(argc, argv, "auto_car_ctrl");                                     // Initalisation de ROS
     ros::param::get("/dist_follow_wall", dist_follow_wall);
-    ros::param::get("/pourcent_range", pourcent_range);
     ros::param::get("/rviz", rviz);
     ROS_INFO("Complete.");
 

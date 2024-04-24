@@ -35,8 +35,6 @@ int main(int argc, char** argv) {
 
     ROS_INFO("Subscribers and publishers creation...");
     ros::NodeHandle nh;                                                         // Communication ROS
-    ros::param::get("/angle_max_left", angle_max_left);
-    ros::param::get("/angle_max_right", angle_max_right);
     ros::param::get("/speed_max", speed_max);
 
     // Création des subscribers ----------------------------------------------------------------------------------

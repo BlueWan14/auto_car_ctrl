@@ -4,10 +4,16 @@
   <arg name="dist_follow_wall" default="0.1" />
   <arg name="rviz" default="true" />
   <arg name="lidar" default="false" />
+
   <!-- Parameters -->
   <param name="pourcent_range" value="$(arg pourcent_range)" />
   <param name="dist_follow_wall" value="$(arg dist_follow_wall)" />
   <param name="rviz" value="$(arg rviz)" />
+
+  <!-- Start the lidar -->
+  <group if="$(eval lidar)">
+    <include file="$(find ydlidar_ros)/launch/X4.launch" />
+  </group>
 
   <!-- Start the nodes -->
   <node name="lidar_process_node" pkg="auto_car_ctrl" type="lidar_process" output="screen" />
@@ -15,10 +21,5 @@
   <!-- Launch RVIZ -->
   <group if="$(eval rviz)">
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find auto_car_ctrl)/rviz/auto_car_ctrl_rviz.rviz" />
-  </group>
-
-  <!-- Start the lidar -->
-  <group if="$(eval lidar)">
-    <include file="$(find ydlidar_ros)/launch/X4.launch" />
   </group>
 </launch>

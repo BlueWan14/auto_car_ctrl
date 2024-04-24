@@ -1,16 +1,10 @@
 <launch>
   <!-- Arguments -->
-  <arg name="pourcent_range" default="0.1" />
   <arg name="dist_follow_wall" default="0.15" />
-  <arg name="angle_max_left" default="25" />
-  <arg name="angle_max_right" default="-20" />
-  <arg name="speed_max" default="100.0" />
+  <arg name="speed_max" default="50.0" />
   <arg name="rviz" default="false" />
   <!-- Parameters -->
-  <param name="pourcent_range" value="$(arg pourcent_range)" />
   <param name="dist_follow_wall" value="$(arg dist_follow_wall)" />
-  <param name="angle_max_left" value="$(arg angle_max_left)" />
-  <param name="angle_max_right" value="$(arg angle_max_right)" />
   <param name="speed_max" value="$(arg speed_max)" />
   <param name="rviz" value="$(arg rviz)" />
 
@@ -24,8 +18,8 @@
   </group>
   
   <!-- Start the arduino communication -->
-  <arg name="arduino_port" default="ACM0" />
-  <node name="arduino_comm" pkg="rosserial_python" type="serial_node.py" args="/dev/tty$(arg arduino_port)" />
+  <arg name="arduino_port" default="ttyACM0" />
+  <node name="arduino_comm" pkg="rosserial_python" type="serial_node.py" args="/dev/$(arg arduino_port)" />
   
   <!-- Start the lidar -->
   <include file="$(find ydlidar_ros)/launch/X4.launch" />
