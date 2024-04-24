@@ -21,7 +21,7 @@ Please look at the graphique *(will comme soon)*.
 ## Sofware
 ### You'll need
 - [ROS noetic](https://wiki.ros.org/ROS)
-- [ydlidar ros driver package](chrome-extension://efaidnbmnnnibpcajpcglclefindmkaj/https://www.ydlidar.com/Public/upload/files/2024-02-01/YDLIDAR%20X4%20Lidar%20User%20Manual%20V1.3(240124).pdf)
+- [ydlidar ros driver package](https://www.ydlidar.com/dowfile.html?cid=5&type=2)
 - [serial ros driver package](https://github.com/ros-drivers/rosserial)
 - [Arduino IDE](https://www.arduino.cc/en/software)
 
