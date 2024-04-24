@@ -47,7 +47,7 @@ This command will launch the entire program. That include lidar and arduino proc
 > [!CAUTION]  
 > Make sure that Arduino card and lidar are plug before execute.
 
-Possible arguments :  
+#### Possible arguments :  
 - `dist_follow_wall:=[decimal number]` => Distance minimal between the lidar and the wall in meter that the car needs to keep. *By default set to `0.15`.*  
 > [!IMPORTANT]  
 > Can't be set under `0.1` because of the car size.
@@ -61,7 +61,7 @@ roslaunch auto_car_ctrl auto_car_ctrl_node.launch
 ```
 This command will launch the three nodes inside this package only. It is usefull for testing the program with a rosbag. You can find some records on the official track [here](./rosbags/).  
  
-Possible arguments :  
+#### Possible arguments :  
 - `dist_follow_wall:=[decimal number]` => Distance minimal between the lidar and the wall in meter that the car needs to keep. *By default set to `0.15`.*  
 > [!IMPORTANT]  
 > Can't be set under `0.1` because of the car size.
@@ -85,7 +85,7 @@ roslaunch auto_car_ctrl lidar_process.launch
 ```
 This command will launch the three nodes inside this package only. It is usefull for testing the program with a rosbag. You can find some records on the official track [here](./rosbags/).  
  
-Possible arguments :  
+#### Possible arguments :  
 - `dist_follow_wall:=[decimal number]` => Distance minimal between the lidar and the wall in meter that the car needs to keep. *By default set to `0.15`.*  
 > [!IMPORTANT]  
 > Can't be set under `0.1` because of the car size.
