@@ -1,24 +1,27 @@
 #include <ros/ros.h>
-#include <auto_car_ctrl/motors.h>
-#include <auto_car_ctrl/rosBool.h>
+
+// ROS messages libraries ----------------------------------------------------------------------------------------
 #include <sensor_msgs/LaserScan.h>
-#include <geometry_msgs/Twist.h>
 #include <visualization_msgs/Marker.h>
 
+#include <auto_car_ctrl/motors.h>
+#include <auto_car_ctrl/rosBool.h>
 
-// DÉCLARATION DES VARIABLES a=====================================================================================
+
+// DÉCLARATION DES VARIABLES =====================================================================================
 #define car_size 0.09
 
 const float pi = std::acos(-1),                                                 // Calcul de pi
-            left_crash_vision = pi / 6,
+            left_crash_vision = pi / 6,                                         // Définition du champ de vision pour considérer un crash
             right_crash_vision = - pi / 6;
+
 float dist_follow_wall = 0.1,
       speed_max = 100.0;
-auto_car_ctrl::rosBool crash;
 bool rviz, isGoodWay;
+visualization_msgs::Marker crash_marker;
+auto_car_ctrl::rosBool crash;
 
 // Other sub and publisher ---------------------------------------------------------------------------------------
-visualization_msgs::Marker crash_marker;
 ros::Subscriber motor_sub;
 ros::Subscriber lidar_sub;
 ros::Subscriber goodWay_sub;
@@ -44,6 +47,8 @@ int main(int argc, char** argv) {
 
     ROS_INFO("Subscribers and publishers creation...");
     ros::NodeHandle nh;                                                         // Communication ROS
+
+    // Réupération des arguments du roslaunch --------------------------------------------------------------------
     ros::param::get("/dist_follow_wall", dist_follow_wall);
     ros::param::get("/speed_max", speed_max);
     ros::param::get("/rviz", rviz);
@@ -56,7 +61,7 @@ int main(int argc, char** argv) {
     crash_pub = nh.advertise<auto_car_ctrl::rosBool>("auto_car/crash/iscrashed", 100);
     if(rviz) {
         ROS_INFO("Markers configuration...");
-        // Marker "position crash" -----------------------------------------------------------------------------------
+        // Définition du marker "position crash" -----------------------------------------------------------------
         crash_marker.ns = "crash";
         crash_marker.id = 0;
         crash_marker.type = visualization_msgs::Marker::POINTS;
@@ -73,58 +78,68 @@ int main(int argc, char** argv) {
     ROS_INFO("Complete.");
 
     ROS_INFO("Starting loop.");
-    ros::spin();
+    ros::spin();                                                                // Lancement de la boucle ROS du noeud
 }
 
-
-// DÉFINITIONS DE FONCTIONS ====================================================================================== 
-void goodWayCallBack(const auto_car_ctrl::rosBool &goodWay_msg) {
-    isGoodWay = goodWay_msg.answer;
-}
 
 // DÉFINITIONS DE FONCTIONS ======================================================================================
 /*
-description : Fonction callback appelée à chaque modification du topic /auto_car/lidar_process
-paramètre : (const, auto_car_ctrl::rosFloat::ConstPtr, pointeur) angle_msg : message reçu.
+description : Fonction callback appelée à chaque modification du topic "/auto_car/crash/goodway"
+paramètre : (const, auto_car_ctrl::rosBool::ConstPtr, pointeur) goodWay_msg : le message ROS reçu.
 */
-void motorCallBack(const auto_car_ctrl::motors &motor_msg) {
-    if(crash.answer && ((motor_msg.rearObstacle < 10.0) || isGoodWay))
-        crash.answer = false;
+void goodWayCallBack(const auto_car_ctrl::rosBool::ConstPtr &goodWay_msg) {
+    isGoodWay = goodWay_msg.answer;
 }
 
 /*
-description : Fonction callback appelée à chaque modification du topic /scan
-paramètre : (const, sensor_msgs::LaserScan::ConstPtr, pointeur) scan_msg : message reçu.
+description : Fonction callback appelée à chaque modification du topic "/auto_car/arduino/mot"
+paramètre : (const, auto_car_ctrl::motors::ConstPtr, pointeur) motor_msg : le message ROS reçu.
+*/
+void motorCallBack(const auto_car_ctrl::motors::ConstPtr &motor_msg) {
+    if(crash.answer && ((motor_msg.rearObstacle < 10.0) || isGoodWay))          // Si un crash a été déclaré ET
+                                                                                // qu'on détecte quelque chose derrière OU qu'on reprend la course
+        crash.answer = false;                                                   // Alors on sort u mode "crash"
+}
+
+/*
+description : Fonction callback appelée à chaque modification du topic "/scan"
+paramètre : (const, sensor_msgs::LaserScan::ConstPtr, pointeur) scan_msg : le message ROS reçu.
 */
 void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg) {
     float angle = 0.0;
     geometry_msgs::Point p;
 
+    // On supprime les points précédemment enregistrés -----------------------------------------------------------
     crash_marker.points.clear();
 
+    // Définition du header pour le message ROS ------------------------------------------------------------------
     crash.header.frame_id = "crash";
     crash.header.stamp = ros::Time::now();
     
+    // On analyse les mesures envoyées par le lidar --------------------------------------------------------------
     for(int i = 0; i <= scan_msg->ranges.size(); i++) {
         angle = scan_msg->angle_min + i * scan_msg->angle_increment;            // On calcul l'angle associé
         
+        // Si l'angle est compris dans le champ de vision choisi et que la mesure est inférieure à la limite entre le mur et la voiture fixée par l'utilisateur
         if(((right_crash_vision < angle) && (angle < left_crash_vision)) && (car_size < scan_msg->ranges[i]) && (scan_msg->ranges[i] < dist_follow_wall)) {
-            crash.answer = true;
-            if(rviz) {
-                p.x = scan_msg->ranges[i] * std::cos(angle);
+            crash.answer = true;                                                // Alors on rentre dans le mode "crash"
+            if(rviz) {                                                          // Si on a un affichage RVIZ
+                p.x = scan_msg->ranges[i] * std::cos(angle);                    // On affiche tous les points
                 p.y = scan_msg->ranges[i] * std::sin(angle);
                 crash_marker.points.push_back(p);
-            } else {
+            } else {                                                            // Sinon, on sort de la boucle for
                 break;
             }
         }
     }
 
+    // Publication des markers sur les topics si affichage RVIZ --------------------------------------------------
     if(rviz) {
         crash_marker.header.frame_id = scan_msg->header.frame_id;
         crash_marker.header.stamp = ros::Time::now();
-        crash_marker_pub.publish(crash_marker);
+        crash_marker_pub.publish(crash_marker);                                 // Publication du marker "auto_car/markers/crash"
     }
 
-    crash_pub.publish(crash);
+    crash_pub.publish(crash);                                                   // On publie le mode actuel ("crash"/"non crash")
+                                                                                // sur le topic "auto_car/crash/iscrashed"
 }
