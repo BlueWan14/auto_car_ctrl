@@ -151,9 +151,6 @@ void setup() {
   // Initialisation des moteurs --------------------------------------------------------
   MotorLinear.writeMicroseconds(NEUTRAL);
   MotorAngular.write(MIDDLE);
-
-  while(!nh.connected())
-    nh.spinOnce();
 }
 
 // MAIN ================================================================================

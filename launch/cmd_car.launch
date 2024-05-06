@@ -17,10 +17,16 @@
     <node type="rviz" name="rviz" pkg="rviz" args="-d $(find auto_car_ctrl)/rviz/auto_car_ctrl_rviz.rviz" />
   </group>
   
-  <!-- Start the arduino communication -->
-  <arg name="arduino_port" default="ttyACM0" />
-  <node name="arduino_comm" pkg="rosserial_python" type="serial_node.py" args="/dev/$(arg arduino_port)" />
-  
   <!-- Start the lidar -->
   <include file="$(find ydlidar_ros)/launch/X4.launch" />
+
+  <!-- Start the arduino communication with 1s of delay -->
+  <arg name="arduino_port" default="ttyACM0" />
+  <include file="$(find timed_roslaunch)/launch/timed_roslaunch.launch">
+    <arg name="time" value="1" />
+    <arg name="pkg" value="auto_car_ctrl" />
+    <arg name="file" value="start_arduino_com.launch" />
+    <arg name="value" value="arduino_port:=$(arg arduino_port)" />
+    <arg name="node_name" value="arduino_comm" />
+  </include>
 </launch>

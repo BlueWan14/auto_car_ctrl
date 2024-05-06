@@ -172,6 +172,7 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg) {
     goal_marker.points.push_back(p);
     wrongGoal_marker.points.clear();
     
+    // Calcul de l'objectif --------------------------------------------------------------------------------------
     for(int size=0; size < NBELT; size++) {
         WrongGoal = false;
         max_range = 0.0;
@@ -181,11 +182,12 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg) {
             skipAngle = false;
 
             if((left_edge_vision > angle) && (angle > right_edge_vision) && (car_size < scan_msg->ranges[i]) && (scan_msg->ranges[i] < scan_msg->range_max)) {
+                // Comparaison entre l'angle et ceux qui ont été précédemment refusés ----------------------------
                 if(size != 0) {
                     for(int i=0; i < size; i++) {
                         if(angle == delAngle[i]) {
-                            skipAngle = true;
-                            break;
+                            skipAngle = true;                                   // Si l'angle a déjà été refusé
+                            break;                                              // Alors on saute l'itération
                         }
                     }
                 }
@@ -196,14 +198,15 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg) {
                 }
             }
         }
-        accept_range = max_range - (max_range * pourcent_range);
-        for(int i = 0; i <= scan_msg->ranges.size(); i++) {
-            angle = scan_msg->angle_min + i * scan_msg->angle_increment;
+        accept_range = max_range - (max_range * pourcent_range);                // On calcul une distance de tolérance
+                                                                                // pour ne pas considérer un mur continu comme un passage inacccessible
+        for(int i = 0; i <= scan_msg->ranges.size(); i++) {                     // Pour chaque distance mesurée
+            angle = scan_msg->angle_min + i * scan_msg->angle_increment;        // On calcul l'angle associé
             
             if((left_edge_vision > angle) && (angle > right_edge_vision) && (car_size < scan_msg->ranges[i]) && (scan_msg->ranges[i] < accept_range)) {
                 space = std::abs(scan_msg->ranges[i] * std::sin(angle - goal.val));
-                if(space < dist_follow_wall) {
-                    delAngle[size] = goal.val;
+                if(space < dist_follow_wall) {                                  // Si la voiture a l'espace de passer entre les obstacles
+                    delAngle[size] = goal.val;                                  // Alors on considdère l'angle comme notre nouvel objecttif
                     WrongGoal = true;
                     if(rviz) {                                                  // Si on a un affichage RVIZ
                         // sides markers
