@@ -44,7 +44,7 @@ ros::Publisher goodWay_pub;
 
 // PROTOTYPES ====================================================================================================
 void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &);
-void crashCallback(const auto_car_ctrl::rosBool &);
+void crashCallback(const auto_car_ctrl::rosBool::ConstPtr &);
 
 
 // MAIN ==========================================================================================================
@@ -139,7 +139,7 @@ description : Fonction callback appelée à chaque modification du topic "/auto_
 paramètre : (const, auto_car_ctrl::rosBool::ConstPtr, pointeur) crash_msg : le message ROS reçu.
 */
 void crashCallback(const auto_car_ctrl::rosBool::ConstPtr &crash_msg) {
-    crash = crash_msg.answer;
+    crash = crash_msg->answer;
 }
 
 /*

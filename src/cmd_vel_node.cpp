@@ -8,6 +8,7 @@
 
 
 // DÉCLARATION DES VARIABLES =====================================================================================
+const float pi = std::acos(-1);                                                 // Calcul de pi
 float speed_max = 60.0,
       way = 1.0;
 int angle_max_left = 40,
@@ -19,8 +20,8 @@ ros::Subscriber way_sub;
 ros::Publisher cmd_pub;
 
 // PROTOTYPES ====================================================================================================
-void lidarCallBack(const auto_car_ctrl::rosFloat &);
-void wayCallBack(const auto_car_ctrl::rosFloat &);
+void lidarCallBack(const auto_car_ctrl::rosFloat::ConstPtr &);
+void wayCallBack(const auto_car_ctrl::rosFloat::ConstPtr &);
 
 // MAIN ==========================================================================================================
 int main(int argc, char** argv) {
@@ -54,19 +55,19 @@ int main(int argc, char** argv) {
 description : Fonction callback appelée à chaque modification du topic "/auto_car/cmd/way"
 paramètre : (const, auto_car_ctrl::rosFloat::ConstPtr, pointeur) way_msg : le message ROS reçu.
 */
-void wayCallBack(const auto_car_ctrl::rosFloat &way_msg) {
-    way = way_msg.val;
+void wayCallBack(const auto_car_ctrl::rosFloat::ConstPtr &way_msg) {
+    way = way_msg->val;
 }
 
 /*
 description : Fonction callback appelée à chaque modification du topic "/auto_car/lidar_process"
 paramètre : (const, auto_car_ctrl::rosFloat::ConstPtr, pointeur) angle_msg : le message ROS reçu.
 */
-void lidarCallBack(const auto_car_ctrl::rosFloat &angle_msg) {
+void lidarCallBack(const auto_car_ctrl::rosFloat::ConstPtr &angle_msg) {
     auto_car_ctrl::CmdVel cmd;
 
     // Commande de rotation des roues (en °) ---------------------------------------------------------------------
-    cmd.angular = angle_msg.val * 180 / pi;
+    cmd.angular = angle_msg->val * 180 / pi;
 
     // Commande de vitesse du moteur (en %) ----------------------------------------------------------------------
     if(cmd.angular < angle_max_right) {

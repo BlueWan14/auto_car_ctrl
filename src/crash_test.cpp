@@ -30,8 +30,8 @@ ros::Publisher crash_marker_pub;
 
 
 // PROTOTYPES ====================================================================================================
-void motorCallBack(const auto_car_ctrl::motors &);
-void goodWayCallBack(const auto_car_ctrl::rosBool &);
+void motorCallBack(const auto_car_ctrl::motors::ConstPtr &);
+void goodWayCallBack(const auto_car_ctrl::rosBool::ConstPtr &);
 void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &);
 
 
@@ -88,7 +88,7 @@ description : Fonction callback appelée à chaque modification du topic "/auto_
 paramètre : (const, auto_car_ctrl::rosBool::ConstPtr, pointeur) goodWay_msg : le message ROS reçu.
 */
 void goodWayCallBack(const auto_car_ctrl::rosBool::ConstPtr &goodWay_msg) {
-    isGoodWay = goodWay_msg.answer;
+    isGoodWay = goodWay_msg->answer;
 }
 
 /*
@@ -96,7 +96,7 @@ description : Fonction callback appelée à chaque modification du topic "/auto_
 paramètre : (const, auto_car_ctrl::motors::ConstPtr, pointeur) motor_msg : le message ROS reçu.
 */
 void motorCallBack(const auto_car_ctrl::motors::ConstPtr &motor_msg) {
-    if(crash.answer && ((motor_msg.rearObstacle < 10.0) || isGoodWay))          // Si un crash a été déclaré ET
+    if(crash.answer && ((motor_msg->rearObstacle < 10.0) || isGoodWay))         // Si un crash a été déclaré ET
                                                                                 // qu'on détecte quelque chose derrière OU qu'on reprend la course
         crash.answer = false;                                                   // Alors on sort u mode "crash"
 }
