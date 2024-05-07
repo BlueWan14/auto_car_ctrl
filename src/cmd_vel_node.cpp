@@ -10,18 +10,19 @@ const float pi = std::acos(-1),                                                 
             left_edge_vision = pi / 2,
             right_edge_vision = - pi / 2;
 float max_range, too_close,
-      speed_max = 100.0;
-int angle_max_left = 25,
-    angle_max_right = -20;
-bool obstacle = true;
+      speed_max = 100.0,
+      way = 1.0;
+int angle_max_left = 40,
+    angle_max_right = -40;
 
 // Other sub and publisher ---------------------------------------------------------------------------------------
 ros::Subscriber processed_sub;
+ros::Subscriber way_sub;
 ros::Publisher cmd_pub;
-
 
 // PROTOTYPES ====================================================================================================
 void lidarCallBack(const auto_car_ctrl::rosFloat &);
+void wayCallBack(const auto_car_ctrl::rosFloat &);
 
 
 // MAIN ==========================================================================================================
@@ -39,9 +40,11 @@ int main(int argc, char** argv) {
     ros::param::get("/speed_max", speed_max);
 
     // Création des subscribers ----------------------------------------------------------------------------------
-    processed_sub = nh.subscribe("/auto_car/lidar_process", 100, &lidarCallBack);
+    processed_sub = nh.subscribe("/auto_car/cmd/lidar_process", 100, &lidarCallBack);
+    way_sub = nh.subscribe("/auto_car/cmd/way", 100, &wayCallBack);
+
     // Création des publishers -----------------------------------------------------------------------------------
-    cmd_pub = nh.advertise<geometry_msgs::Twist>("auto_car/cmd_vel", 100);
+    cmd_pub = nh.advertise<geometry_msgs::Twist>("auto_car/arduino/cmd_vel", 100);
     ROS_INFO("Complete.");
 
     ROS_INFO("Starting loop.");
@@ -58,7 +61,7 @@ void lidarCallBack(const auto_car_ctrl::rosFloat &angle_msg) {
     geometry_msgs::Twist cmd;
 
     // Commande de rotation des roues (en °)
-    cmd.angular.z = angle_msg.val * 180 / pi;                           // Suivi de l'objectif
+    cmd.angular.z = angle_msg.val * 180 / pi;                                   // Suivi de l'objectif
 
     // Commande de vitesse du moteur (en %)
     if(cmd.angular.z < angle_max_right) {
@@ -68,8 +71,12 @@ void lidarCallBack(const auto_car_ctrl::rosFloat &angle_msg) {
         // On ralenti pour tourner plus vite à gauche
         cmd.linear.x = speed_max - ((cmd.angular.z - angle_max_left) * speed_max / (91.5 - angle_max_left));
     } else {
-        cmd.linear.x = speed_max;                                           // On met les gaz
+        cmd.linear.x = way * speed_max;                                         // On met les gaz
     }
 
     cmd_pub.publish(cmd);
+}
+
+void wayCallBack(const auto_car_ctrl::rosFloat &way_msg) {
+    way = way_msg.val;
 }

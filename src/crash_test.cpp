@@ -6,7 +6,7 @@
 #include <visualization_msgs/Marker.h>
 
 
-// DÉCLARATION DES VARIABLES =====================================================================================
+// DÉCLARATION DES VARIABLES a=====================================================================================
 #define car_size 0.09
 
 const float pi = std::acos(-1),                                                 // Calcul de pi
@@ -16,16 +16,19 @@ float dist_follow_wall = 0.1,
       speed_max = 100.0;
 bool start_flag = false;
 auto_car_ctrl::rosBool crash;
+bool isGoodWay = true;
 
 // Other sub and publisher ---------------------------------------------------------------------------------------
 ros::Subscriber motor_sub;
 ros::Subscriber lidar_sub;
+ros::Subscriber goodWay_sub;
 ros::Publisher crash_pub;
 ros::Publisher cmd_pub;
 
 
 // PROTOTYPES ====================================================================================================
 void motorCallBack(const auto_car_ctrl::motors &);
+void goodWayCallBack(const auto_car_ctrl::rosBool &)
 void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &);
 
 
@@ -47,9 +50,9 @@ int main(int argc, char** argv) {
     // Création des subscribers ----------------------------------------------------------------------------------
     motor_sub = nh.subscribe("/auto_car/arduino/mot", 100, &motorCallBack);
     lidar_sub = nh.subscribe("/scan", 100, &lidarCallback);
+    goodWay_sub = nh.subscribe("/auto_car/crash/goodway", 100, &goodWayCallBack);
     // Création des publishers -----------------------------------------------------------------------------------
-    crash_pub = nh.advertise<auto_car_ctrl::rosBool>("auto_car/crash", 100);
-    cmd_pub = nh.advertise<geometry_msgs::Twist>("auto_car/cmd_vel", 100);
+    crash_pub = nh.advertise<auto_car_ctrl::rosBool>("auto_car/crash/iscrashed", 100);
     ROS_INFO("Complete.");
 
     ROS_INFO("Starting loop.");
@@ -66,12 +69,23 @@ void motorCallBack(const auto_car_ctrl::motors &motor_msg) {
     crash.header.frame_id = "crash";
     crash.header.stamp = ros::Time::now();
 
-    if((motor_msg.vel.linear.x != 0) && (motor_msg.coder == 0)) {
+    //coder = true --> voiture à l'arrêt
+    //coder = false --> voiture en mouvement
+    if((motor_msg.vel.linear.x != 0) && motor_msg.coder && !isGoodWay) {
         crash.answer = true;
     }
-
+    if(crash.answer && ((motor_msg.rearObstacle < 10.0) || isGoodWay)) {
+        crash.answer = false;    
+    }
+    
     crash_pub.publish(crash);
 }
+
+ 
+void goodWayCallBack(const auto_car_ctrl::rosBool &goodWay_msg) {
+    isGoodWay = goodWay_msg.answer;
+}
+
 
 /*
 description : Fonction callback appelée à chaque modification du topic /scan
