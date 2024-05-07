@@ -1,6 +1,24 @@
 <launch>
-  <!-- Start the node -->
-  <node name="auto_car_ctrl_node" pkg="auto_car_ctrl" type="auto_car_ctrl_node" />
+  <!-- Arguments -->
+  <arg name="pourcent_range" default="0.1" />
+  <arg name="dist_follow_wall" default="0.15" />
+  <arg name="angle_max_left" default="25" />
+  <arg name="angle_max_right" default="-20" />
+  <!-- Parameters -->
+  <param name="pourcent_range" value="$(arg pourcent_range)" />
+  <param name="dist_follow_wall" value="$(arg dist_follow_wall)" />
+  <param name="angle_max_left" value="$(arg angle_max_left)" />
+  <param name="angle_max_right" value="$(arg angle_max_right)" />
+
+  <!-- Start the nodes -->
+  <node name="crash_node" pkg="auto_car_ctrl" type="crash_test" />
+  <node name="lidar_process_node" pkg="auto_car_ctrl" type="lidar_process" />
+  <node name="cmd_vel_node" pkg="auto_car_ctrl" type="cmd_vel_node" />
+  
+  <arg name="rviz" default="false" />
+  <group if="$(eval rviz == true)">
+    <node type="rviz" name="rviz" pkg="rviz" args="-d $(find auto_car_ctrl)/rviz/auto_car_ctrl_rviz.rviz" />
+  </group>
   
   <!-- Start the arduino communication -->
   <arg name="arduino_port" default="/dev/ttyACM0" />

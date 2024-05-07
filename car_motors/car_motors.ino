@@ -22,10 +22,8 @@
 #define ForwardMax 3000
 #define NEUTRAL 2000
 #define BackwardMax 1000
-// Bornes liées au braquage de la voiture
-#define TurnLeftMax 115
+// Bornes liées à la direction de la voiture
 #define MIDDLE 90
-#define TurnRightMax 70
 // Bornes liées à la vitesse
 #define ctrl_forward_max 1775
 #define ctrl_neutral 1360
@@ -35,7 +33,7 @@
 #define ctrl_middle 1300
 #define ctrl_right_max 1080
 // Spécifications télécommandes
-#define auto_limit 1700
+#define auto_limit 1800
 #define treshold_ctrller 30
 // Valeurs de tension batterie
 #define Tension_Max_Batterie 8.2
@@ -50,12 +48,15 @@ auto_car_ctrl::motors msg_mot;
 // Initialisation des variables servomoteurs
 Servo MotorLinear;
 Servo MotorAngular;
+// Bornes liées à la direction de la voiture
+int TurnLeftMax = 115,
+  TurnRightMax = 65;
 // Initialisation des variables de commande
 int MotSpeed = NEUTRAL,
     MotAngle = 90,
     Speed_mem = NEUTRAL;
 // Initialisation des variables de télécommande
-int SW = auto_limit,
+int SW = 0,
     average_speed = ctrl_neutral,
     average_dir = ctrl_middle,
     i_speed = 1,
@@ -74,7 +75,7 @@ paramètre : (const, geometry_msgs::Twist, pointeur) msg : message reçu.
 */
 void cmdCallback(const geometry_msgs::Twist &msg) {
   if(SW > auto_limit) {
-    msg_mot.RC_cmd.auto_select = true;
+    msg_mot.RC_cmd.auto_select = false;
 
     // Lecture des commandes selon le torseur envoyé -------------------------------------
     float RosSpeedX = msg.linear.x;
@@ -157,10 +158,9 @@ paramètre : (int) pin : pin recevant les données
             (int) defaultValue : valeur neutre de la donnée
 return : (int) Commande.
 */
-int readController(int pin, int defaultValue) {
-  unsigned long cmd;
+int readController(int pin, int defaultValue, int* average, int* i) {
+  int cmd = pulseIn(pin, HIGH);
 
-  cmd = pulseIn(pin, HIGH);
   if(((cmd < (defaultValue - treshold_ctrller)) || (cmd > (defaultValue + treshold_ctrller))) && (cmd != 0)) {
     return cmd;
   } else {
@@ -171,7 +171,7 @@ int readController(int pin, int defaultValue) {
 
 // COMMUNICATION ROS ===================================================================
 // Initialisation d'export de donnée sur le topic "auto_car/mot/vel"
-ros::Publisher return_vel("auto_car/mot/vel", &msg_mot);
+ros::Publisher return_vel("auto_car/arduino/mot", &msg_mot);
 // Initialisation de reception de donnée sur le topic "auto_car/cmd_vel"
 ros::Subscriber<geometry_msgs::Twist> cmd_vel("auto_car/cmd_vel", &cmdCallback);
 
@@ -206,17 +206,15 @@ void setup() {
 void loop() {
   // Réception des données de la télécommande ------------------------------------------
   SW = pulseIn(pin_SW, HIGH); // Commande auto/manuel
-  Speed_mem = MotSpeed;       // Sauvegarde de la vitesse en mémoire
 
   if(SW <= auto_limit) {
-    msg_mot.RC_cmd.auto_select = false;
-
-    msg_mot.RC_cmd.speed = readController(pin_speed, ctrl_neutral),
-    msg_mot.RC_cmd.direction = readController(pin_dir, ctrl_middle);
+    msg_mot.RC_cmd.auto_select = true;
+    msg_mot.RC_cmd.speed = readController(pin_speed, ctrl_neutral, &average_speed, &i_speed),
+    msg_mot.RC_cmd.direction = readController(pin_dir, ctrl_middle, &average_dir, &i_dir);
     
     // Calcul des commandes réelles
-    MotSpeed = constrain(PtV(VtP(msg_mot.RC_cmd.speed, ctrl_forward_max, ctrl_neutral, ctrl_backward_max), ForwardMax, NEUTRAL, BackwardMax), BackwardMax, ForwardMax);
-    MotAngle = constrain(PtV(VtP(msg_mot.RC_cmd.direction, ctrl_left_max, ctrl_middle, ctrl_right_max), TurnLeftMax, MIDDLE, TurnRightMax), TurnRightMax, TurnLeftMax);
+    MotSpeed = constrain(PtV(VtP(msg_mot.RC_cmd.speed, ctrl_forward_max+treshold_ctrller, ctrl_neutral, ctrl_backward_max-treshold_ctrller), ForwardMax, NEUTRAL, BackwardMax), BackwardMax, ForwardMax);
+    MotAngle = constrain(PtV(VtP(msg_mot.RC_cmd.direction, ctrl_left_max+treshold_ctrller, ctrl_middle, ctrl_right_max-treshold_ctrller), TurnLeftMax, MIDDLE, TurnRightMax), TurnRightMax, TurnLeftMax);
 
     // Pour passer en vitesse négative, il faut d'abord "freiner" en engageant une première marche arrière
     break_sys();
@@ -224,15 +222,13 @@ void loop() {
     // Écriture de la nouvelle commande
     MotorLinear.writeMicroseconds(MotSpeed);
     MotorAngular.write(MotAngle);
-  } else {
-    msg_mot.RC_cmd.auto_select = true;
   }
 
   if((millis() - MillisMem) > 1000) {
     // Calcul et affichage de la tension batterie ----------------------------------------
     Tension = analogRead(pin_Batt) * 4.8 / 1023 * 2;
-    Pourcentage_Batt = constrain(Tension, Tension_Min_Batterie, Tension_Max_Batterie);
-    Pourcentage_Batt = (Pourcentage_Batt - Tension_Min_Batterie) * 100 / (Tension_Max_Batterie - Tension_Min_Batterie);
+    Tension = constrain(Tension, Tension_Min_Batterie, Tension_Max_Batterie);
+    Pourcentage_Batt = (Tension - Tension_Min_Batterie) * 100 / (Tension_Max_Batterie - Tension_Min_Batterie);
 
     // Affichage de la valeur sur le lcd -------------------------------------------------
     lcd.clear();

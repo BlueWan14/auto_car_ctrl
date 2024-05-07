@@ -55,6 +55,8 @@ add_message_files(
     FILES
     motors.msg
     RCCommand.msg
+    rosBool.msg
+    rosFloat.msg
 )
 
 # # Generate services in the 'srv' folder
@@ -76,6 +78,7 @@ generate_messages(
     DEPENDENCIES
     std_msgs
     geometry_msgs
+    sensor_msgs
 )
 
 roslaunch_add_file_check(launch)
@@ -140,8 +143,9 @@ include_directories(
 # Declare a C++ executable
 # With catkin_make all packages are built within a single CMake context
 # The recommended prefix ensures that target names across packages don't collide
-add_executable(auto_car_ctrl_node src/auto_car_ctrl_node.cpp)
-
+add_executable(lidar_process src/lidar_process.cpp)
+add_executable(crash_test src/crash_test.cpp)
+add_executable(cmd_vel_node src/cmd_vel_node.cpp)
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -153,10 +157,18 @@ add_executable(auto_car_ctrl_node src/auto_car_ctrl_node.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 # Specify libraries to link a library or executable target against
-target_link_libraries(auto_car_ctrl_node
+target_link_libraries(
+    lidar_process
     ${catkin_LIBRARIES}
 )
-
+target_link_libraries(
+    crash_test
+    ${catkin_LIBRARIES}
+)
+target_link_libraries(
+    cmd_vel_node
+    ${catkin_LIBRARIES}
+)
 #############
 ## Install ##
 #############
