@@ -1,0 +1,10 @@
+<launch>
+  <!-- Start the node -->
+  <node name="auto_car_ctrl_node" pkg="auto_car_ctrl" type="auto_car_ctrl_node" />
+  
+  <!-- Start the arduino communication -->
+  <node name="arduino_comm" pkg="rosserial_python" type="serial_node.py" args="/dev/ttyACM0" />
+  
+  <!-- Start the lidar -->
+  <include file="$(find ydlidar_ros)/launch/X4.launch" />
+</launch>

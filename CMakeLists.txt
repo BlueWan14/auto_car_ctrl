@@ -14,6 +14,7 @@ find_package(catkin REQUIRED
     geometry_msgs
     std_msgs
     message_generation
+    COMPONENTS roslaunch
 )
 
 ## System dependencies are found with CMake's conventions
@@ -76,6 +77,8 @@ generate_messages(
     geometry_msgs
 )
 
+roslaunch_add_file_check(launch)
+
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
 ################################################
@@ -106,12 +109,9 @@ generate_messages(
 # CATKIN_DEPENDS: catkin_packages dependent projects also need
 # DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-    CATKIN_DEPENDS message_runtime
-)
-catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES auto_car_ctrl
-#  CATKIN_DEPENDS std_msgs geometry_msgs message_runtime message_generation
+   CATKIN_DEPENDS message_runtime
 #  DEPENDS system_lib
 )
 
@@ -139,7 +139,7 @@ include_directories(
 # Declare a C++ executable
 # With catkin_make all packages are built within a single CMake context
 # The recommended prefix ensures that target names across packages don't collide
-add_executable(cmd_car src/cmd_car.cpp)
+add_executable(auto_car_ctrl_node src/auto_car_ctrl_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -152,7 +152,7 @@ add_executable(cmd_car src/cmd_car.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 # Specify libraries to link a library or executable target against
-target_link_libraries(cmd_car
+target_link_libraries(auto_car_ctrl_node
     ${catkin_LIBRARIES}
 )
 

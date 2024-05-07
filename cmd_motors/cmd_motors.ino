@@ -72,7 +72,7 @@ int MotSpeed,
   i_speed = 1,                      i_dir = 1,
   i_timer = 0;
 float MotAngle,
-  speed,                            dir;
+  speed, dir;
 unsigned long cmd_dir, cmd_speed, cmd_SW;
 volatile long pulseCount = 0;
 volatile unsigned long elapsedTime = 0;
