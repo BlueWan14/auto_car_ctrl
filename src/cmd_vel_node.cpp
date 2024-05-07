@@ -9,7 +9,8 @@
 const float pi = std::acos(-1),                                                 // Calcul de pi
             left_edge_vision = pi / 2,
             right_edge_vision = - pi / 2;
-float max_range, too_close;
+float max_range, too_close,
+      speed_max = 100.0;
 int angle_max_left = 25,
     angle_max_right = -20;
 bool obstacle = true;
@@ -35,6 +36,7 @@ int main(int argc, char** argv) {
     ros::NodeHandle nh;                                                         // Communication ROS
     ros::param::get("/angle_max_left", angle_max_left);
     ros::param::get("/angle_max_right", angle_max_right);
+    ros::param::get("/speed_max", speed_max);
 
     // Création des subscribers ----------------------------------------------------------------------------------
     processed_sub = nh.subscribe("/auto_car/lidar_process", 100, &lidarCallBack);
@@ -61,12 +63,12 @@ void lidarCallBack(const auto_car_ctrl::rosFloat &angle_msg) {
     // Commande de vitesse du moteur (en %)
     if(cmd.angular.z < angle_max_right) {
         // On ralenti pour tourner plus vite à droite
-        cmd.linear.x = 100.0 - ((cmd.angular.z - angle_max_right) * 100.0 / (-91.5 - angle_max_right));
+        cmd.linear.x = speed_max - ((cmd.angular.z - angle_max_right) * speed_max / (-91.5 - angle_max_right));
     } else if(cmd.angular.z > angle_max_left) {
         // On ralenti pour tourner plus vite à gauche
-        cmd.linear.x = 100.0 - ((cmd.angular.z - angle_max_left) * 100.0 / (91.5 - angle_max_left));
+        cmd.linear.x = speed_max - ((cmd.angular.z - angle_max_left) * speed_max / (91.5 - angle_max_left));
     } else {
-        cmd.linear.x = 100.0;                                           // On met les gaz
+        cmd.linear.x = speed_max;                                           // On met les gaz
     }
 
     cmd_pub.publish(cmd);

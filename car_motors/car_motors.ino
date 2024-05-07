@@ -19,8 +19,8 @@
 
 // BORNES DE COMMANDES =================================================================
 // Bornes liées à la vitesse
-#define ForwardMax 3000
-#define NEUTRAL 2000
+#define ForwardMax 2000
+#define NEUTRAL 1500
 #define BackwardMax 1000
 // Bornes liées à la direction de la voiture
 #define MIDDLE 90
@@ -29,9 +29,9 @@
 #define ctrl_neutral 1360
 #define ctrl_backward_max 905
 // Bornes liées au braquage de la voiture
-#define ctrl_left_max 1500
-#define ctrl_middle 1300
-#define ctrl_right_max 1080
+#define ctrl_left_max 1530
+#define ctrl_middle 1306
+#define ctrl_right_max 1078
 // Spécifications télécommandes
 #define auto_limit 1800
 #define treshold_ctrller 30
@@ -42,18 +42,15 @@
 
 
 // VARIABLES ===========================================================================
-// Initialisation des variables liées à ROS
-ros::NodeHandle nh;
-auto_car_ctrl::motors msg_mot;
 // Initialisation des variables servomoteurs
 Servo MotorLinear;
 Servo MotorAngular;
 // Bornes liées à la direction de la voiture
 int TurnLeftMax = 115,
-  TurnRightMax = 65;
+      TurnRightMax = 65;
 // Initialisation des variables de commande
 int MotSpeed = NEUTRAL,
-    MotAngle = 90,
+    MotAngle = MIDDLE,
     Speed_mem = NEUTRAL;
 // Initialisation des variables de télécommande
 int SW = 0,
@@ -75,8 +72,6 @@ paramètre : (const, geometry_msgs::Twist, pointeur) msg : message reçu.
 */
 void cmdCallback(const geometry_msgs::Twist &msg) {
   if(SW > auto_limit) {
-    msg_mot.RC_cmd.auto_select = false;
-
     // Lecture des commandes selon le torseur envoyé -------------------------------------
     float RosSpeedX = msg.linear.x;
     float RosAngleZ = msg.angular.z;
@@ -170,6 +165,9 @@ int readController(int pin, int defaultValue, int* average, int* i) {
 
 
 // COMMUNICATION ROS ===================================================================
+// Initialisation des variables liées à ROS
+ros::NodeHandle nh;
+auto_car_ctrl::motors msg_mot;
 // Initialisation d'export de donnée sur le topic "auto_car/mot/vel"
 ros::Publisher return_vel("auto_car/arduino/mot", &msg_mot);
 // Initialisation de reception de donnée sur le topic "auto_car/cmd_vel"
@@ -195,6 +193,11 @@ void setup() {
   nh.subscribe(cmd_vel);      // On s'abonne à cmd_vel
   nh.advertise(return_vel);   // On configure return_vel afin de publier dessus
 
+  if(nh.getParam("/angle_max_left", &TurnLeftMax))
+    TurnLeftMax = TurnLeftMax + MIDDLE;
+  if(nh.getParam("/angle_max_right", &TurnRightMax))
+    TurnRightMax = TurnRightMax + MIDDLE;
+
   // Initialisation des moteurs --------------------------------------------------------
   MotorLinear.writeMicroseconds(NEUTRAL);
   MotorAngular.write(MIDDLE);
@@ -208,7 +211,7 @@ void loop() {
   SW = pulseIn(pin_SW, HIGH); // Commande auto/manuel
 
   if(SW <= auto_limit) {
-    msg_mot.RC_cmd.auto_select = true;
+    msg_mot.RC_cmd.auto_select = false;
     msg_mot.RC_cmd.speed = readController(pin_speed, ctrl_neutral, &average_speed, &i_speed),
     msg_mot.RC_cmd.direction = readController(pin_dir, ctrl_middle, &average_dir, &i_dir);
     
@@ -222,6 +225,8 @@ void loop() {
     // Écriture de la nouvelle commande
     MotorLinear.writeMicroseconds(MotSpeed);
     MotorAngular.write(MotAngle);
+  } else {
+    msg_mot.RC_cmd.auto_select = true;
   }
 
   if((millis() - MillisMem) > 1000) {
