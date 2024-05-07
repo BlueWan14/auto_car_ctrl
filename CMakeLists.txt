@@ -54,6 +54,7 @@ find_package(catkin REQUIRED
 add_message_files(
     FILES
     motors.msg
+    RCCommand.msg
 )
 
 # # Generate services in the 'srv' folder

@@ -1,4 +1,4 @@
-float64 Vmax
-float64 rot_left_max
-float64 rot_right_max
+int64 coder
+float64 voltage
 geometry_msgs/Twist vel
+auto_car_ctrl/RCCommand RC_cmd

@@ -7,7 +7,7 @@
 
 // DÉCLARATION DES VARIABLES =====================================================================================
 #define car_size 0.09
-#define dist_follow_wall 0.15
+#define dist_follow_wall 0.5
 
 const float pi = std::acos(-1),                                                 // Calcul de pi
             left_edge_vision = pi / 2,
@@ -140,11 +140,16 @@ void lidarCallback(const sensor_msgs::LaserScan::ConstPtr &scan_msg) {
         }
     }
     if(tooClose) {
-        cmd.angular.z = angle_tooClose * 180 / pi;       // Commande de rotation des roues (en °)
+        cmd.angular.z = - angle_tooClose * 180 / pi;       // Commande de rotation des roues (en °)
+        ROS_INFO("T'ES TROP PROCHE");
+        ROS_INFO("%f", cmd.angular.z);
+        ROS_INFO(" ---- ");
     } else {
-        cmd.angular.z = -angle_range_max * 180 / pi;      // Commande de rotation des roues (en °)
+        cmd.angular.z = angle_range_max * 180 / pi;      // Commande de rotation des roues (en °)
+        ROS_INFO("%f", cmd.angular.z);
+        ROS_INFO(" ---- ");
     }
-    cmd.linear.x = 0;                                                          // Commande de vitesse du moteur (en %)
+    cmd.linear.x = 20;                                                          // Commande de vitesse du moteur (en %)
     cmd_vel.publish(cmd);                                                       // Publication sur le topic auto_car/cmd_vel
 
     // Publication des markers sur les topics --------------------------------------------------------------------
