@@ -1,6 +1,7 @@
 # Abstract
 This repository present you a package running with ROS noetic. It is used for [Autonomous car competition](https://ajuton-ens.github.io/CourseVoituresAutonomesSaclay/) organized by Paris Saclay.  
-This is an academic project for the authors[^1] during their 2<sup>nd</sup> year of [mecatronic in ISTY](https://www.isty.uvsq.fr/cycle-ingenieur-mecatronique)[^2].
+This is an academic project for the authors[^1] during their 2<sup>nd</sup> year of [mecatronic in ISTY](https://www.isty.uvsq.fr/cycle-ingenieur-mecatronique)[^2].  
+You can find demonstration videos on [the youtube channel](https://www.youtube.com/@istypolice).
 
 <p align="center">
     <img src="./resources/Img/logoISTY.png" width="60%">
